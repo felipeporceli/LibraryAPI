@@ -25,13 +25,4 @@ AutorDTO (UUID id,
           @NotBlank (message = "Campo obrigatório")
           @Size (min = 3, max = 50, message = "Campo fora do tamanho permitido")
           String nacionalidade) {
-
-    // Metodo para criar o objeto do tipo Autor
-    public Autor mapearParaAutor() {
-        Autor autor = new Autor();
-        autor.setNome(this.nome);
-        autor.setDataNascimento(this.dataNascimento);
-        autor.setNacionalidade(this.nacionalidade);
-        return autor;
-    }
 }
