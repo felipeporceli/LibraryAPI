@@ -4,12 +4,16 @@ import io.github.felipeporceli.LibraryAPI.controllers.dto.AutorDTO;
 import io.github.felipeporceli.LibraryAPI.controllers.dto.ErroResposta;
 import io.github.felipeporceli.LibraryAPI.controllers.mappers.AutorMapper;
 import io.github.felipeporceli.LibraryAPI.entities.Autor;
+import io.github.felipeporceli.LibraryAPI.entities.Usuario;
 import io.github.felipeporceli.LibraryAPI.exceptions.OperacaoNaoPermitidaException;
 import io.github.felipeporceli.LibraryAPI.exceptions.RegistroDuplicadoException;
 import io.github.felipeporceli.LibraryAPI.services.AutorService;
+import io.github.felipeporceli.LibraryAPI.services.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -30,13 +34,19 @@ public class AutorController implements GenericController {
 
     // Injeção de dependência para podermos chamar a camada de negócios
     private final AutorService service;
+    private final UsuarioService usuarioService;
     private final AutorMapper mapper;
 
 
     // Metodo para podermos salvar um autor
     @PostMapping
-    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto) {
+    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto,
+                                         Authentication authentication) {
+
+        UserDetails usuarioAutenticado = (UserDetails) authentication.getPrincipal();
+        Usuario usuario = usuarioService.obterPorLogin(usuarioAutenticado.getUsername());
         Autor autor = mapper.toEntity(dto);
+        autor.setIdUsuario(usuario.getId());
         service.salvar(autor);
 
         // Esse código monta dinamicamente a URL para o recurso recém-criado usando o ID dele, seguindo o padrão REST

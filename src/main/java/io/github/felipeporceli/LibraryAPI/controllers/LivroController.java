@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.mapstruct.Mapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/livros")
 @RequiredArgsConstructor // <- Anotation para gerar injeção de dependências automático
+@PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
 public class LivroController implements GenericController {
 
     private final LivroService service;
@@ -30,6 +32,7 @@ public class LivroController implements GenericController {
     private final LivroMapper mapper;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     public ResponseEntity<Object> salvar(@RequestBody @Valid CadastroLivroDTO dto) {
         // Mapear DTO para entidade
         Livro livro = mapper.toEntity(dto);
@@ -38,7 +41,9 @@ public class LivroController implements GenericController {
         return ResponseEntity.created(location).build();
     }
 
+
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     public ResponseEntity<ResultadoPesquisaLivroDTO> obterDetalhes (@PathVariable("id") String id) {
         return service.obterPorId(UUID.fromString(id))
                 .map(livro -> {
@@ -47,6 +52,7 @@ public class LivroController implements GenericController {
                 }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     @DeleteMapping("{id}")
     public ResponseEntity<Object> deletar (@PathVariable("id") String id) {
         return service.obterPorId(UUID.fromString(id))
@@ -56,6 +62,7 @@ public class LivroController implements GenericController {
                 }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     @GetMapping
     public ResponseEntity<Page<ResultadoPesquisaLivroDTO>> pesquisa (
             @RequestParam (value = "isbn", required = false)
@@ -84,6 +91,7 @@ public class LivroController implements GenericController {
         return ResponseEntity.ok(resultado);
     }
 
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     @PutMapping ("{id}")
     public ResponseEntity<Object> atualizar (@PathVariable("id") String id, @RequestBody CadastroLivroDTO dto) {
         return service.obterPorId(UUID.fromString(id))
